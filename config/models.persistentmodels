@@ -3,9 +3,19 @@
 
 User
     ident Text
+    name Text
+    email Text
+    phone Text
+    plugin Text -- what auth backend is used by this user
     password Text Maybe
-    UniqueUser ident
+    UniqueUser plugin ident
+    isVendor Bool -- Default to false, when User is just a customer
+    addr AddressId Maybe -- Required for vendors, but optional for customers
+    slogan Text Maybe
+    banner Text Maybe -- a file that points to an image file on the disk
+    avatar Text Maybe -- a file that points to an image file on the disk
     deriving Typeable
+    
 Email
     email Text
     userId UserId Maybe
@@ -16,3 +26,54 @@ Comment json -- Adding "json" causes ToJSON and FromJSON instances to be derived
     userId UserId Maybe
     deriving Eq
     deriving Show
+
+Address
+    line1 Text
+    line2 Text Maybe
+    city Text
+    state Text
+    zip Text
+    deriving Eq
+    deriving Show
+
+Product
+    name Text
+    description Textarea
+    supplier UserId
+    price Rational
+    unit Text -- sold in, for instance, each or per lb
+    pictures [Text] -- a list of files that point to image files on the disk
+    category [Text]
+    tags [Text]
+    
+
+Order
+    placeBy UserId
+    orderEntries [OrderEntryId]
+    createdAt UTCTime
+    completed Bool -- is the order completed?
+    completedAt UTCTime Maybe
+    canceled Bool Maybe -- default if False
+    paid Bool Maybe -- default to False
+    paidAt UTCTime Maybe
+    refunded Bool Maybe -- default to False
+    refundedAt UTCTime Maybe
+
+OrderEntry
+    fullfiller UserId -- an order can contain products fulfilled by different vendors
+    product ProductId
+    quantity Int -- a customer may purchase multiples of the same item in one order
+    
+Event
+    name Text
+    slogan Text Maybe
+    description Textarea Maybe
+    start UTCTime Maybe
+    end   UTCTime Maybe
+    heldBy UserId -- who holds the event, this is also the fulfiller/pickup location
+    products [StockEntryId]
+    
+StockEntry
+    product ProductId
+    quantity Int Maybe -- a supplier may or may not limit the quatity to be sold; one product could have different quantities in a store and in an event
+    hide Bool Maybe -- a supplier may decide to hide a product temprorily
